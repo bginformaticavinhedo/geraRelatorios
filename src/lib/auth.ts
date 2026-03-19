@@ -14,8 +14,13 @@ export const authOptions: NextAuthOptions = {
             },
         }),
     ],
+    secret: process.env.NEXTAUTH_SECRET,
+    session: {
+        strategy: "jwt",
+    },
     callbacks: {
-        async jwt({ token, account }) {
+        async jwt({ token, account, user, profile }) {
+            // Se o login acabou de acontecer, o account estará disponível
             if (account) {
                 token.accessToken = account.access_token;
             }
@@ -29,4 +34,6 @@ export const authOptions: NextAuthOptions = {
     pages: {
         signIn: "/auth/signin", // We will create a custom signin page later or let it default
     },
+    // Habilitando debug para facilitar a visualização de erros nos logs do Netlify
+    debug: process.env.NODE_ENV === "development" || true,
 };
