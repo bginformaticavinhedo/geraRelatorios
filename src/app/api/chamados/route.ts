@@ -75,7 +75,13 @@ export async function GET(request: Request) {
                 CreatedFormatted: formattedDate,
                 Cliente: typeof f.Cliente === 'object' ? f.Cliente?.LookupValue || f.Cliente?.Value || JSON.stringify(f.Cliente) : f.Cliente,
                 Status: typeof f.Status === 'object' ? f.Status?.LookupValue || f.Status?.Value || JSON.stringify(f.Status) : f.Status,
-                Tecnico: tecnicoValue
+                Tecnico: tecnicoValue,
+                Descricao: f['Descri_x00e7__x00e3_o'] || f['Descricao'] || f['Descrição'] || '',
+                // Robust mapping for "CanaldeAtendimento" (SharePoint might use exact spacing or simple name)
+                Canal: (() => {
+                    const val = f['CanaldeAtendimento'] || f['Canal_x0020_de_x0020_Atendimento'] || f['Canal'] || 'Não Esp.';
+                    return typeof val === 'object' ? val?.LookupValue || val?.Value || JSON.stringify(val) : val;
+                })()
             };
         });
 

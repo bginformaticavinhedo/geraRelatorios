@@ -19,6 +19,25 @@ export async function exportToPDF(data: any[], title: string, columns: string[])
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text(`Relatório gerado em: ${today}`, 14, 28);
+
+    // Canal counts sumary for Chamados
+    if (title.toLowerCase().includes("chamados")) {
+        const counts = data.reduce((acc: any, item: any) => {
+            const c = (item.Canal || "Sem Canal").trim().toLowerCase();
+            acc[c] = (acc[c] || 0) + 1;
+            return acc;
+        }, {});
+        const parts = Object.entries(counts).map(([c, count]) => {
+            const label = c === "remoto" ? "remotos" : c === "presencial" ? "presenciais" : c;
+            return `${count} ${label}`;
+        });
+        if (parts.length > 0) {
+            const txt = `Atendimentos: ${parts.join(' | ')}`;
+            // Draw next to date, e.g at x=75
+            doc.text(txt, 75, 28);
+        }
+    }
+
     doc.text(`Total de registros: ${data.length}`, pageWidth - 50, 28);
 
     const columnMapping: { [key: string]: string } = {
@@ -33,7 +52,8 @@ export async function exportToPDF(data: any[], title: string, columns: string[])
         'HoraFinalFormatada': 'FIM',
         'Horas': 'DUR.',
         'DuracaoFormatada': 'DURAÇÃO',
-        'Descricao': 'DESCRIÇÃO'
+        'Descricao': 'DESCRIÇÃO',
+        'Observacoes': 'OBSERVAÇÕES'
     };
 
     // Cálculo do total de horas (se for apontamentos)
@@ -84,7 +104,8 @@ export async function exportToPDF(data: any[], title: string, columns: string[])
             [columns.indexOf('HoraInicioFormatada')]: { cellWidth: 22 },
             [columns.indexOf('HoraFinalFormatada')]: { cellWidth: 22 },
             [columns.indexOf('DuracaoFormatada')]: { cellWidth: 30 },
-            [columns.indexOf('Descricao')]: { cellWidth: 'auto' }
+            [columns.indexOf('Descricao')]: { cellWidth: 'auto' },
+            [columns.indexOf('Observacoes')]: { cellWidth: 'auto' }
         },
         margin: { top: 45, left: 14, right: 14, bottom: 25 },
         didDrawPage: (data) => {

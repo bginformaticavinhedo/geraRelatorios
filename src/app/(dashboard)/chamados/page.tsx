@@ -57,10 +57,11 @@ export default function ChamadosReport() {
             }
             return {
                 ...item,
-                Data: dataStr || '-'
+                Data: dataStr || '-',
+                Observacoes: item.Descricao || '-'
             };
         });
-        exportToPDF(exportData, "Relatório de Chamados", ["Title", "Cliente", "Data", "Status", "Tecnico"]);
+        exportToPDF(exportData, "Relatório de Chamados", ["Title", "Cliente", "Data", "Status", "Tecnico", "Observacoes"]);
     };
 
     const handleExportExcel = () => {
@@ -79,9 +80,10 @@ export default function ChamadosReport() {
                 "Chamado": item.Title,
                 "Cliente": item.Cliente,
                 "Data": dataStr || '-',
+                "Canal de Atendimento": item.Canal || '-',
                 "Status": item.Status,
                 "Técnico": item.Tecnico,
-                "Descrição": item.Descricao || '-'
+                "Observações": item.Descricao || '-'
             };
         });
         exportToExcel(exportData, "Relatório de Chamados");
@@ -151,6 +153,33 @@ export default function ChamadosReport() {
                     <Search className="mr-2 h-4 w-4" /> Filtrar
                 </Button>
             </div>
+
+            {/* Canal Summary */}
+            {data && data.length > 0 && (
+                <div className="bg-white border-l-4 border-slate-800 p-4 rounded-sm shadow-sm flex flex-col md:flex-row gap-4 items-start md:items-center">
+                    <div>
+                        <h3 className="text-xs font-bold uppercase text-slate-500 tracking-widest mb-3">Atendimentos no Período</h3>
+                        <div className="flex flex-wrap gap-3 mt-1">
+                            {Object.entries(
+                                data.reduce((acc: Record<string, number>, item: Chamado) => {
+                                    const c = (item.Canal || "Sem Canal Info").trim();
+                                    acc[c] = (acc[c] || 0) + 1;
+                                    return acc;
+                                }, {} as Record<string, number>)
+                            ).map(([canal, count]) => {
+                                const l = (canal as string).toLowerCase();
+                                const label = l === "remoto" ? "remotos" : l === "presencial" ? "presenciais" : l;
+                                return (
+                                    <div key={canal as string} className="text-sm font-semibold text-slate-700 bg-slate-50 px-4 py-1.5 rounded-sm border border-slate-200 flex items-center gap-2">
+                                        <span className="text-accent text-lg font-bold">{count as number}</span>
+                                        <span className="capitalize">{label}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Data Table */}
             <div className="bg-white rounded-sm shadow-sm border border-slate-200 overflow-hidden">

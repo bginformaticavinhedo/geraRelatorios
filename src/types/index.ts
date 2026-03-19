@@ -9,6 +9,7 @@ export interface Chamado {
     Status: string;
     Tecnico: string; // Person or Text
     Descricao: string;
+    Canal?: string;
 }
 
 export interface Apontamento {

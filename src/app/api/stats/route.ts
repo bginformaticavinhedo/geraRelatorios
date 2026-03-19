@@ -85,6 +85,10 @@ export async function GET() {
 
     } catch (error: any) {
         console.error("Stats API Error:", error);
-        return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
+        return NextResponse.json({
+            error: "Failed to fetch stats",
+            details: error.message || String(error),
+            statusCode: error.statusCode
+        }, { status: 500 });
     }
 }
