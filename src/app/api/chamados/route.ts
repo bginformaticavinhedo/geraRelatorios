@@ -150,10 +150,8 @@ export async function GET(request: Request) {
 
         return NextResponse.json(
             {
-                error: "Failed to fetch data. Likely invalid column name.",
-                details: error.message,
-                possibleFix: "Check your SharePoint list settings for internal names.",
-                availableColumnsOnFirstItem: availableFields
+                error: "Falha ao buscar dados do SharePoint.",
+                message: "Não foi possível recuperar a lista de chamados. Verifique as configurações de conexão."
             },
             { status: 500 }
         );

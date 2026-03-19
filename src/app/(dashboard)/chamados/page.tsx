@@ -189,22 +189,9 @@ export default function ChamadosReport() {
                     </div>
                 ) : isError ? (
                     <div className="p-12 text-center text-red-500 space-y-2">
-                        <p className="font-bold">Erro ao carregar dados.</p>
-                        <p className="text-sm">{(error as any)?.message}</p>
-                        {(error as any)?.details && (
-                            <p className="text-xs bg-red-50 p-2 rounded border border-red-100 font-mono text-left overflow-auto max-h-32">
-                                Details: {(error as any).details}
-                            </p>
-                        )}
-                        {(error as any)?.availableColumnsOnFirstItem && (
-                            <div className="text-left mt-4 p-4 bg-slate-900 text-slate-200 rounded text-xs font-mono">
-                                <p className="font-bold mb-2 text-yellow-400">⚠️ DEBUG: Colunas Disponíveis (Internal Names):</p>
-                                <div className="break-all text-xs">
-                                    {(error as any).availableColumnsOnFirstItem}
-                                </div>
-                            </div>
-                        )}
-                        <p className="text-xs mt-4 text-slate-400">Verifique se o Site ID está configurado no .env.local</p>
+                        <p className="font-bold text-lg">⚠️ Ops! Houve um problema.</p>
+                        <p className="text-sm">Ocorreu um erro ao carregar os chamados. Por favor, tente novamente mais tarde ou contate o suporte.</p>
+                        <p className="text-xs mt-4 text-slate-400">Verifique sua conexão com o SharePoint</p>
                     </div>
                 ) : data && data.length > 0 ? (
                     <div className="overflow-x-auto">

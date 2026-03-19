@@ -86,9 +86,8 @@ export async function GET() {
     } catch (error: any) {
         console.error("Stats API Error:", error);
         return NextResponse.json({
-            error: "Failed to fetch stats",
-            details: error.message || String(error),
-            statusCode: error.statusCode
+            error: "Falha ao carregar estatísticas.",
+            message: "Houve um erro técnico ao processar os indicadores."
         }, { status: 500 });
     }
 }
