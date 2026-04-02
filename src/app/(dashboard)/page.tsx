@@ -21,7 +21,7 @@ export default function DashboardPage() {
 
     const now = new Date();
     const currentYear = now.getFullYear();
-    const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(now);
+    const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long', timeZone: 'America/Sao_Paulo' }).format(now);
     const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1);
 
     return (

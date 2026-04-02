@@ -4,7 +4,7 @@ export async function exportToPDF(data: any[], title: string, columns: string[])
     // Usar Paisagem (Landscape) para dar mais espaço horizontal
     const doc = new jsPDF('l', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
-    const today = new Date().toLocaleDateString('pt-BR');
+    const today = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
 
     // --- Header Estilizado ---
     doc.setFillColor(15, 23, 42);
