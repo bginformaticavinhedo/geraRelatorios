@@ -21,22 +21,41 @@ export async function GET(request: Request) {
     try {
         const client = getGraphClient(session.accessToken);
 
-        // Fetch items sorted by creation date descending to get the newest ones first
-        const response = await client
+        let allValues: any[] = [];
+        let response = await client
             .api(`/sites/${SHAREPOINT_SITE_ID}/lists/Apontamentos/items`)
             .expand('fields')
             .header('Prefer', 'HonorNonIndexedQueriesWarningMayFailRandomly')
             .query(`$top=2000&$orderby=createdDateTime asc`)
             .get();
 
-        let rawItems = response.value;
+        if (response.value) {
+            allValues.push(...response.value);
+        }
+
+        while (response["@odata.nextLink"]) {
+            response = await client
+                .api(response["@odata.nextLink"])
+                .header('Prefer', 'HonorNonIndexedQueriesWarningMayFailRandomly')
+                .get();
+            
+            if (response.value) {
+                allValues.push(...response.value);
+            }
+            
+            if (allValues.length > 20000) break;
+        }
+
+        let rawItems = allValues;
 
         // Apply filters in JS
         if (startDate && endDate) {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            // Set end date to end of day
-            end.setHours(23, 59, 59, 999);
+            // Treat the start and end dates strictly in Brazil Time (UTC-3)
+            const startOnly = startDate.split('T')[0];
+            const endOnly = endDate.split('T')[0];
+            
+            const start = new Date(`${startOnly}T00:00:00-03:00`);
+            const end = new Date(`${endOnly}T23:59:59.999-03:00`);
 
             rawItems = rawItems.filter((item: any) => {
                 const f = item.fields;
@@ -75,8 +94,7 @@ export async function GET(request: Request) {
             }
 
             // Mantemos a precisão total para o cálculo interno e soma
-            const parsedFallback = fields.Horas !== undefined && fields.Horas !== null ? parseFloat(String(fields.Horas).replace(',', '.')) || 0 : 0;
-            const finalHours = calculatedHours > 0 ? calculatedHours : parsedFallback;
+            const finalHours = calculatedHours > 0 ? calculatedHours : (parseFloat(fields.Horas) || 0);
 
             // Formatação amigável de horas (ex: 0.8333h -> 50min)
             const totalMinutes = Math.round(finalHours * 60);
@@ -95,8 +113,8 @@ export async function GET(request: Request) {
                 // Mapeamos para uma chave consistente para o frontend
                 Horas: finalHours,
                 DuracaoFormatada: formattedDuration,
-                HoraInicioFormatada: rawStart ? new Date(rawStart).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }) : '-',
-                HoraFinalFormatada: rawEnd ? new Date(rawEnd).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }) : '-',
+                HoraInicioFormatada: rawStart ? new Date(rawStart).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-',
+                HoraFinalFormatada: rawEnd ? new Date(rawEnd).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-',
                 Descricao: fields['Descri_x00e7__x00e3_o'] || fields['Descricao'] || fields['Descrição'],
                 Created: fields.Created || item.createdDateTime
             };

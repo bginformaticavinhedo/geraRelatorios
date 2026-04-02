@@ -1,10 +1,12 @@
-export async function exportToPDF(data: any[], title: string, columns: string[]) {
-    const jsPDF = (await import("jspdf")).default;
-    const autoTable = (await import("jspdf-autotable")).default;
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
+
+export function exportToPDF(data: any[], title: string, columns: string[]) {
     // Usar Paisagem (Landscape) para dar mais espaço horizontal
     const doc = new jsPDF('l', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
-    const today = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    const today = new Date().toLocaleDateString('pt-BR');
 
     // --- Header Estilizado ---
     doc.setFillColor(15, 23, 42);
@@ -19,25 +21,6 @@ export async function exportToPDF(data: any[], title: string, columns: string[])
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text(`Relatório gerado em: ${today}`, 14, 28);
-
-    // Canal counts sumary for Chamados
-    if (title.toLowerCase().includes("chamados")) {
-        const counts = data.reduce((acc: any, item: any) => {
-            const c = (item.Canal || "Sem Canal").trim().toLowerCase();
-            acc[c] = (acc[c] || 0) + 1;
-            return acc;
-        }, {});
-        const parts = Object.entries(counts).map(([c, count]) => {
-            const label = c === "remoto" ? "remotos" : c === "presencial" ? "presenciais" : c;
-            return `${count} ${label}`;
-        });
-        if (parts.length > 0) {
-            const txt = `Atendimentos: ${parts.join(' | ')}`;
-            // Draw next to date, e.g at x=75
-            doc.text(txt, 75, 28);
-        }
-    }
-
     doc.text(`Total de registros: ${data.length}`, pageWidth - 50, 28);
 
     const columnMapping: { [key: string]: string } = {
@@ -52,8 +35,7 @@ export async function exportToPDF(data: any[], title: string, columns: string[])
         'HoraFinalFormatada': 'FIM',
         'Horas': 'DUR.',
         'DuracaoFormatada': 'DURAÇÃO',
-        'Descricao': 'DESCRIÇÃO',
-        'Observacoes': 'OBSERVAÇÕES'
+        'Descricao': 'DESCRIÇÃO'
     };
 
     // Cálculo do total de horas (se for apontamentos)
@@ -104,8 +86,7 @@ export async function exportToPDF(data: any[], title: string, columns: string[])
             [columns.indexOf('HoraInicioFormatada')]: { cellWidth: 22 },
             [columns.indexOf('HoraFinalFormatada')]: { cellWidth: 22 },
             [columns.indexOf('DuracaoFormatada')]: { cellWidth: 30 },
-            [columns.indexOf('Descricao')]: { cellWidth: 'auto' },
-            [columns.indexOf('Observacoes')]: { cellWidth: 'auto' }
+            [columns.indexOf('Descricao')]: { cellWidth: 'auto' }
         },
         margin: { top: 45, left: 14, right: 14, bottom: 25 },
         didDrawPage: (data) => {
@@ -135,8 +116,7 @@ export async function exportToPDF(data: any[], title: string, columns: string[])
     doc.save(fileName);
 }
 
-export async function exportToExcel(data: any[], title: string) {
-    const XLSX = await import("xlsx");
+export function exportToExcel(data: any[], title: string) {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Dados");

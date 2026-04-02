@@ -21,13 +21,13 @@ export default function DashboardPage() {
 
     const now = new Date();
     const currentYear = now.getFullYear();
-    const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long', timeZone: 'America/Sao_Paulo' }).format(now);
+    const currentMonthName = new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(now);
     const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1);
 
     return (
         <div className="space-y-8 animate-[fade-in_0.5s_ease-out]">
             {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-sm bg-primary text-primary-foreground p-8 md:p-12 border border-slate-800">
+            <div className="relative overflow-hidden rounded-sm bg-primary text-primary-foreground p-6 md:p-12 border border-slate-800">
                 <div className="relative z-10 max-w-2xl">
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tighter mb-4">
                         Olá, <span className="text-accent">{firstName}</span>.

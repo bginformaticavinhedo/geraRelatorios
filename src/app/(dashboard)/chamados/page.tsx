@@ -51,17 +51,16 @@ export default function ChamadosReport() {
                 try {
                     const date = new Date(item.Created);
                     if (!isNaN(date.getTime())) {
-                        dataStr = date.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+                        dataStr = date.toLocaleDateString('pt-BR');
                     }
                 } catch (e) { }
             }
             return {
                 ...item,
-                Data: dataStr || '-',
-                Observacoes: item.Descricao || '-'
+                Data: dataStr || '-'
             };
         });
-        exportToPDF(exportData, "Relatório de Chamados", ["Title", "Cliente", "Data", "Status", "Tecnico", "Observacoes"]);
+        exportToPDF(exportData, "Relatório de Chamados", ["Title", "Cliente", "Data", "Status", "Tecnico"]);
     };
 
     const handleExportExcel = () => {
@@ -72,7 +71,7 @@ export default function ChamadosReport() {
                 try {
                     const date = new Date(item.Created);
                     if (!isNaN(date.getTime())) {
-                        dataStr = date.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+                        dataStr = date.toLocaleDateString('pt-BR');
                     }
                 } catch (e) { }
             }
@@ -80,10 +79,9 @@ export default function ChamadosReport() {
                 "Chamado": item.Title,
                 "Cliente": item.Cliente,
                 "Data": dataStr || '-',
-                "Canal de Atendimento": item.Canal || '-',
                 "Status": item.Status,
                 "Técnico": item.Tecnico,
-                "Observações": item.Descricao || '-'
+                "Descrição": item.Descricao || '-'
             };
         });
         exportToExcel(exportData, "Relatório de Chamados");
@@ -154,33 +152,6 @@ export default function ChamadosReport() {
                 </Button>
             </div>
 
-            {/* Canal Summary */}
-            {data && data.length > 0 && (
-                <div className="bg-white border-l-4 border-slate-800 p-4 rounded-sm shadow-sm flex flex-col md:flex-row gap-4 items-start md:items-center">
-                    <div>
-                        <h3 className="text-xs font-bold uppercase text-slate-500 tracking-widest mb-3">Atendimentos no Período</h3>
-                        <div className="flex flex-wrap gap-3 mt-1">
-                            {Object.entries(
-                                data.reduce((acc: Record<string, number>, item: Chamado) => {
-                                    const c = (item.Canal || "Sem Canal Info").trim();
-                                    acc[c] = (acc[c] || 0) + 1;
-                                    return acc;
-                                }, {} as Record<string, number>)
-                            ).map(([canal, count]) => {
-                                const l = (canal as string).toLowerCase();
-                                const label = l === "remoto" ? "remotos" : l === "presencial" ? "presenciais" : l;
-                                return (
-                                    <div key={canal as string} className="text-sm font-semibold text-slate-700 bg-slate-50 px-4 py-1.5 rounded-sm border border-slate-200 flex items-center gap-2">
-                                        <span className="text-accent text-lg font-bold">{count as number}</span>
-                                        <span className="capitalize">{label}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Data Table */}
             <div className="bg-white rounded-sm shadow-sm border border-slate-200 overflow-hidden">
                 {isLoading ? (
@@ -189,9 +160,22 @@ export default function ChamadosReport() {
                     </div>
                 ) : isError ? (
                     <div className="p-12 text-center text-red-500 space-y-2">
-                        <p className="font-bold text-lg">⚠️ Ops! Houve um problema.</p>
-                        <p className="text-sm">Ocorreu um erro ao carregar os chamados. Por favor, tente novamente mais tarde ou contate o suporte.</p>
-                        <p className="text-xs mt-4 text-slate-400">Verifique sua conexão com o SharePoint</p>
+                        <p className="font-bold">Erro ao carregar dados.</p>
+                        <p className="text-sm">{(error as any)?.message}</p>
+                        {(error as any)?.details && (
+                            <p className="text-xs bg-red-50 p-2 rounded border border-red-100 font-mono text-left overflow-auto max-h-32">
+                                Details: {(error as any).details}
+                            </p>
+                        )}
+                        {(error as any)?.availableColumnsOnFirstItem && (
+                            <div className="text-left mt-4 p-4 bg-slate-900 text-slate-200 rounded text-xs font-mono">
+                                <p className="font-bold mb-2 text-yellow-400">⚠️ DEBUG: Colunas Disponíveis (Internal Names):</p>
+                                <div className="break-all text-xs">
+                                    {(error as any).availableColumnsOnFirstItem}
+                                </div>
+                            </div>
+                        )}
+                        <p className="text-xs mt-4 text-slate-400">Verifique se o Site ID está configurado no .env.local</p>
                     </div>
                 ) : data && data.length > 0 ? (
                     <div className="overflow-x-auto">

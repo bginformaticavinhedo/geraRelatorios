@@ -1,0 +1,68 @@
+[
+  {
+    "id": "1774462239981",
+    "nome": "AKG",
+    "setor": "Geral",
+    "maquinas": 0,
+    "licencas": 0,
+    "status": "Ativo",
+    "ultimaAtividade": "25/03/2026",
+    "url": "https://bginformaticavinhedo.sharepoint.com/sites/AKGPOLIMEROS/Lists/Dispositivos/Todos%20os%20itens.aspx",
+    "codigoEmpresa": "001"
+  },
+  {
+    "id": "1774462256604",
+    "nome": "CIBI SANA",
+    "setor": "Geral",
+    "maquinas": 0,
+    "licencas": 0,
+    "status": "Ativo",
+    "ultimaAtividade": "25/03/2026",
+    "url": "https://bginformaticavinhedo.sharepoint.com/sites/CIBISANA/Lists/Dispositivos/Todos%20os%20itens.aspx",
+    "codigoEmpresa": "002"
+  },
+  {
+    "id": "1774462269538",
+    "nome": "COLAW",
+    "setor": "Geral",
+    "maquinas": 0,
+    "licencas": 0,
+    "status": "Ativo",
+    "ultimaAtividade": "25/03/2026",
+    "url": "https://bginformaticavinhedo.sharepoint.com/sites/CORREADEOLIVEIRAREALESADVOGADOS/Lists/Dispositivos/Todos%20os%20itens.aspx",
+    "codigoEmpresa": "003"
+  },
+  {
+    "id": "1774462284787",
+    "nome": "DALEFRUT",
+    "setor": "Geral",
+    "maquinas": 0,
+    "licencas": 5,
+    "status": "Ativo",
+    "ultimaAtividade": "25/03/2026",
+    "url": "https://bginformaticavinhedo.sharepoint.com/sites/DALEFRUT/Lists/Dispositivos/AllItems.aspx",
+    "codigoEmpresa": "004"
+  },
+  {
+    "id": "1774463689940",
+    "nome": "POLYTECH",
+    "setor": "Geral",
+    "maquinas": 0,
+    "licencas": 0,
+    "status": "Ativo",
+    "ultimaAtividade": "25/03/2026",
+    "url": "https://bginformaticavinhedo.sharepoint.com/sites/POLYTECH-PLASTICOSTECNICOS/Lists/Dispositivos/AllItems.aspx",
+    "codigoEmpresa": "022"
+  },
+  {
+    "id": "1774467207182",
+    "nome": "PERFILIX",
+    "setor": "Geral",
+    "maquinas": 0,
+    "licencas": 0,
+    "status": "Ativo",
+    "ultimaAtividade": "25/03/2026",
+    "url": "https://bginformaticavinhedo.sharepoint.com/sites/PERFILIX0/Lists/Dispositivos/Todos%20os%20itens.aspx",
+    "codigoEmpresa": "021"
+  }
+]

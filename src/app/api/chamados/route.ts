@@ -26,14 +26,34 @@ export async function GET(request: Request) {
         // Fetch all items (up to 1000) and filter in JS to avoid 400 errors with calculated columns
         // or complex OData filters that SharePoint often rejects.
         // Fetch items sorted by creation date descending to get the newest ones first
-        const response = await client
+        let allValues: any[] = [];
+        
+        let response = await client
             .api(`/sites/${SHAREPOINT_SITE_ID}/lists/Chamados/items`)
             .expand('fields')
             .header('Prefer', 'HonorNonIndexedQueriesWarningMayFailRandomly')
             .query(`$top=2000&$orderby=createdDateTime asc`)
             .get();
 
-        let items = response.value.map((item: any) => {
+        if (response.value) {
+            allValues.push(...response.value);
+        }
+
+        while (response["@odata.nextLink"]) {
+            response = await client
+                .api(response["@odata.nextLink"])
+                .header('Prefer', 'HonorNonIndexedQueriesWarningMayFailRandomly')
+                .get();
+            
+            if (response.value) {
+                allValues.push(...response.value);
+            }
+            
+            // To prevent memory or infinite loop issues just in case, break if too many
+            if (allValues.length > 20000) break;
+        }
+
+        let items = allValues.map((item: any) => {
             const f = item.fields;
             // Get creation date from fields or root object (Graph metadata)
             const created = f.Created || item.createdDateTime;
@@ -75,13 +95,7 @@ export async function GET(request: Request) {
                 CreatedFormatted: formattedDate,
                 Cliente: typeof f.Cliente === 'object' ? f.Cliente?.LookupValue || f.Cliente?.Value || JSON.stringify(f.Cliente) : f.Cliente,
                 Status: typeof f.Status === 'object' ? f.Status?.LookupValue || f.Status?.Value || JSON.stringify(f.Status) : f.Status,
-                Tecnico: tecnicoValue,
-                Descricao: f['Descri_x00e7__x00e3_o'] || f['Descricao'] || f['Descrição'] || '',
-                // Robust mapping for "CanaldeAtendimento" (SharePoint might use exact spacing or simple name)
-                Canal: (() => {
-                    const val = f['CanaldeAtendimento'] || f['Canal_x0020_de_x0020_Atendimento'] || f['Canal'] || 'Não Esp.';
-                    return typeof val === 'object' ? val?.LookupValue || val?.Value || JSON.stringify(val) : val;
-                })()
+                Tecnico: tecnicoValue
             };
         });
 
@@ -101,10 +115,12 @@ export async function GET(request: Request) {
         }
 
         if (startDate && endDate) {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            // Set end date to end of day
-            end.setHours(23, 59, 59, 999);
+            // Treat the start and end dates strictly in Brazil Time (UTC-3)
+            const startOnly = startDate.split('T')[0];
+            const endOnly = endDate.split('T')[0];
+            
+            const start = new Date(`${startOnly}T00:00:00-03:00`);
+            const end = new Date(`${endOnly}T23:59:59.999-03:00`);
 
             items = items.filter((item: any) => {
                 const createdDate = item.Created ? new Date(item.Created) : null;
@@ -150,8 +166,10 @@ export async function GET(request: Request) {
 
         return NextResponse.json(
             {
-                error: "Falha ao buscar dados do SharePoint.",
-                message: "Não foi possível recuperar a lista de chamados. Verifique as configurações de conexão."
+                error: "Failed to fetch data. Likely invalid column name.",
+                details: error.message,
+                possibleFix: "Check your SharePoint list settings for internal names.",
+                availableColumnsOnFirstItem: availableFields
             },
             { status: 500 }
         );
