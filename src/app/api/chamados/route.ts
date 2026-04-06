@@ -53,7 +53,17 @@ export async function GET(request: Request) {
             if (allValues.length > 20000) break;
         }
 
-        let items = (allValues as any[]).map((item: any) => {
+        // Deduplicate by item ID — SharePoint pagination can return overlapping items
+        const uniqueMap = new Map<string, any>();
+        for (const item of allValues as any[]) {
+            const key = item.id;
+            if (key && !uniqueMap.has(key)) {
+                uniqueMap.set(key, item);
+            }
+        }
+        const uniqueValues = Array.from(uniqueMap.values());
+
+        let items = uniqueValues.map((item: any) => {
             const f = item.fields;
             // Get creation date from fields or root object (Graph metadata)
             const created = f.Created || item.createdDateTime;
