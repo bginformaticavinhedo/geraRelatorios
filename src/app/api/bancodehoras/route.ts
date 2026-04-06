@@ -134,8 +134,8 @@ export async function GET(request: Request) {
                 // Mapeamos para uma chave consistente para o frontend
                 Horas: finalHours,
                 DuracaoFormatada: formattedDuration,
-                HoraInicioFormatada: rawStart ? new Date(rawStart).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-',
-                HoraFinalFormatada: rawEnd ? new Date(rawEnd).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '-',
+                HoraInicioFormatada: rawStart ? new Date(rawStart).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }) : '-',
+                HoraFinalFormatada: rawEnd ? new Date(rawEnd).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }) : '-',
                 Descricao: fields['Descri_x00e7__x00e3_o'] || fields['Descricao'] || fields['Descrição'],
                 Created: fields.Created || item.createdDateTime
             };

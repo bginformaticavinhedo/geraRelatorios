@@ -51,7 +51,7 @@ export default function ChamadosReport() {
                 try {
                     const date = new Date(item.Created);
                     if (!isNaN(date.getTime())) {
-                        dataStr = date.toLocaleDateString('pt-BR');
+                        dataStr = date.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
                     }
                 } catch (e) { }
             }
@@ -71,7 +71,7 @@ export default function ChamadosReport() {
                 try {
                     const date = new Date(item.Created);
                     if (!isNaN(date.getTime())) {
-                        dataStr = date.toLocaleDateString('pt-BR');
+                        dataStr = date.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
                     }
                 } catch (e) { }
             }

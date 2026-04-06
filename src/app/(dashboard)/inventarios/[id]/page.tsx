@@ -281,7 +281,7 @@ export default function DetalhesInventarioPage() {
 
         doc.setFontSize(10);
         doc.setTextColor(100);
-        doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 40, 60);
+        doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`, 40, 60);
         doc.text(`Código Empresa: ${codigoEmpresa}`, 40, 75);
 
         // Prepare data for table

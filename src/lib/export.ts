@@ -6,7 +6,7 @@ export function exportToPDF(data: any[], title: string, columns: string[]) {
     // Usar Paisagem (Landscape) para dar mais espaço horizontal
     const doc = new jsPDF('l', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
-    const today = new Date().toLocaleDateString('pt-BR');
+    const today = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
 
     // --- Header Estilizado ---
     doc.setFillColor(15, 23, 42);
@@ -112,7 +112,7 @@ export function exportToPDF(data: any[], title: string, columns: string[]) {
         doc.text(`TOTAL GERAL DE HORAS: ${wholeHours}h ${remainingMinutes}min`, 18, finalY + 8);
     }
 
-    const fileName = `${title.toLowerCase().replace(/\s/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    const fileName = `${title.toLowerCase().replace(/\s/g, "_")}_${new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })}.pdf`;
     doc.save(fileName);
 }
 
@@ -120,5 +120,5 @@ export function exportToExcel(data: any[], title: string) {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Dados");
-    XLSX.writeFile(workbook, `${title.toLowerCase().replace(/\s/g, "_")}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.writeFile(workbook, `${title.toLowerCase().replace(/\s/g, "_")}_${new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })}.xlsx`);
 }

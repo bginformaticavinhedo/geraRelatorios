@@ -120,7 +120,7 @@ export async function POST(request: Request) {
             maquinas: 0,
             licencas: body.licencas || 0,
             status: body.status || "Ativo",
-            ultimaAtividade: new Date().toLocaleDateString("pt-BR"),
+            ultimaAtividade: new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }),
             url: body.url || "",
             codigoEmpresa: finalCodigo
         };
