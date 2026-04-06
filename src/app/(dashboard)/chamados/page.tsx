@@ -15,15 +15,20 @@ export default function ChamadosReport() {
         startDate: "",
         endDate: ""
     });
+    const [appliedFilters, setAppliedFilters] = useState(filters);
+
+    const handleFilter = () => {
+        setAppliedFilters({ ...filters });
+    };
 
     const { data, isLoading, isError, error } = useQuery<Chamado[]>({
-        queryKey: ["chamados", filters],
+        queryKey: ["chamados", appliedFilters],
         queryFn: async () => {
             const params = new URLSearchParams();
-            if (filters.cliente) params.append("cliente", filters.cliente);
-            if (filters.status) params.append("status", filters.status);
-            if (filters.startDate) params.append("startDate", filters.startDate);
-            if (filters.endDate) params.append("endDate", filters.endDate);
+            if (appliedFilters.cliente) params.append("cliente", appliedFilters.cliente);
+            if (appliedFilters.status) params.append("status", appliedFilters.status);
+            if (appliedFilters.startDate) params.append("startDate", appliedFilters.startDate);
+            if (appliedFilters.endDate) params.append("endDate", appliedFilters.endDate);
 
             const res = await fetch(`/api/chamados?${params.toString()}`);
             if (!res.ok) {
@@ -158,7 +163,7 @@ export default function ChamadosReport() {
                         onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                     />
                 </label>
-                <Button className="h-10 rounded-sm w-full">
+                <Button className="h-10 rounded-sm w-full" onClick={handleFilter}>
                     <Search className="mr-2 h-4 w-4" /> Filtrar
                 </Button>
             </div>
@@ -209,7 +214,6 @@ export default function ChamadosReport() {
                                     <th className="px-4 py-3 text-left">Cliente</th>
                                     <th className="px-4 py-3 text-left">Abertura</th>
                                     <th className="px-4 py-3 text-left">Tecnico</th>
-                                    <th className="px-4 py-3 text-left">Ações Aplicadas</th>
                                     <th className="px-4 py-3 text-left">Status</th>
                                 </tr>
                             </thead>
@@ -220,7 +224,6 @@ export default function ChamadosReport() {
                                         <td className="px-4 py-3 text-slate-600">{item.Cliente}</td>
                                         <td className="px-4 py-3 text-slate-600 font-mono text-xs">{item.CreatedFormatted || '-'}</td>
                                         <td className="px-4 py-3 text-slate-600">{item.Tecnico}</td>
-                                        <td className="px-4 py-3 text-slate-600 text-xs max-w-xs truncate" title={item.AcoesAplicadas || '-'}>{item.AcoesAplicadas || '-'}</td>
                                         <td className="px-4 py-3">
                                             <span className={cn("px-2 py-0.5 text-[0.7rem] uppercase font-bold tracking-wider rounded-sm",
                                                 item.Status === 'Fechado' ? "bg-green-100 text-green-700" :

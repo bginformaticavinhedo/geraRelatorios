@@ -12,13 +12,18 @@ export default function BancoDeHorasReport() {
         startDate: "",
         endDate: ""
     });
+    const [appliedFilters, setAppliedFilters] = useState(filters);
+
+    const handleFilter = () => {
+        setAppliedFilters({ ...filters });
+    };
 
     const { data, isLoading, isError, error } = useQuery<Apontamento[]>({
-        queryKey: ["bancodehoras", filters],
+        queryKey: ["bancodehoras", appliedFilters],
         queryFn: async () => {
             const params = new URLSearchParams();
-            if (filters.startDate) params.append("startDate", filters.startDate);
-            if (filters.endDate) params.append("endDate", filters.endDate);
+            if (appliedFilters.startDate) params.append("startDate", appliedFilters.startDate);
+            if (appliedFilters.endDate) params.append("endDate", appliedFilters.endDate);
 
             const res = await fetch(`/api/bancodehoras?${params.toString()}`);
             if (!res.ok) {
@@ -125,7 +130,7 @@ export default function BancoDeHorasReport() {
                         onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                     />
                 </label>
-                <Button className="h-10 rounded-sm w-full">
+                <Button className="h-10 rounded-sm w-full" onClick={handleFilter}>
                     <Search className="mr-2 h-4 w-4" /> Filtrar
                 </Button>
             </div>
