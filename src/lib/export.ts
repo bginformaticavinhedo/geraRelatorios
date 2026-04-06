@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
-export function exportToPDF(data: any[], title: string, columns: string[]) {
+export function exportToPDF(data: Record<string, any>[], title: string, columns: string[], metadata?: { channelStats?: Record<string, number> }) {
     // Usar Paisagem (Landscape) para dar mais espaço horizontal
     const doc = new jsPDF('l', 'mm', 'a4');
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -22,6 +22,18 @@ export function exportToPDF(data: any[], title: string, columns: string[]) {
     doc.setFont("helvetica", "normal");
     doc.text(`Relatório gerado em: ${today}`, 14, 28);
     doc.text(`Total de registros: ${data.length}`, pageWidth - 50, 28);
+
+    // Channel stats below header if provided
+    let headerHeight = 35;
+    if (metadata?.channelStats) {
+        headerHeight = 45;
+        doc.setFillColor(30, 41, 59);
+        doc.rect(0, 35, pageWidth, 10, 'F');
+        doc.setTextColor(200, 200, 200);
+        doc.setFontSize(8);
+        const statsText = Object.entries(metadata.channelStats).map(([k, v]) => `${k}: ${v}`).join('   |   ');
+        doc.text(statsText, 14, 42);
+    }
 
     const columnMapping: { [key: string]: string } = {
         'Title': 'TÍTULO / ID',
@@ -57,7 +69,7 @@ export function exportToPDF(data: any[], title: string, columns: string[]) {
     autoTable(doc, {
         head: [friendlyHeaders],
         body: tableData,
-        startY: 45,
+        startY: headerHeight + 10,
         theme: 'striped',
         styles: {
             fontSize: 9,
@@ -116,7 +128,7 @@ export function exportToPDF(data: any[], title: string, columns: string[]) {
     doc.save(fileName);
 }
 
-export function exportToExcel(data: any[], title: string) {
+export function exportToExcel(data: Record<string, any>[], title: string) {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Dados");

@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         // Fetch all items (up to 1000) and filter in JS to avoid 400 errors with calculated columns
         // or complex OData filters that SharePoint often rejects.
         // Fetch items sorted by creation date descending to get the newest ones first
-        let allValues: any[] = [];
+        let allValues: unknown[] = [];
         
         let response = await client
             .api(`/sites/${SHAREPOINT_SITE_ID}/lists/Chamados/items`)
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
             if (allValues.length > 20000) break;
         }
 
-        let items = allValues.map((item: any) => {
+        let items = (allValues as any[]).map((item: any) => {
             const f = item.fields;
             // Get creation date from fields or root object (Graph metadata)
             const created = f.Created || item.createdDateTime;
@@ -95,7 +95,9 @@ export async function GET(request: Request) {
                 CreatedFormatted: formattedDate,
                 Cliente: typeof f.Cliente === 'object' ? f.Cliente?.LookupValue || f.Cliente?.Value || JSON.stringify(f.Cliente) : f.Cliente,
                 Status: typeof f.Status === 'object' ? f.Status?.LookupValue || f.Status?.Value || JSON.stringify(f.Status) : f.Status,
-                Tecnico: tecnicoValue
+                Tecnico: tecnicoValue,
+                CanalDeAtendimento: f.CanaldeAtendimento || f.Canal_x0020_de_x0020_Atendimento || f.CanalDeAtendimento || f.Canal || '',
+                AcoesAplicadas: f.A_x00e7__x00f5_esaplicadas || f.AcoesAplicadas || ''
             };
         });
 
@@ -140,13 +142,14 @@ export async function GET(request: Request) {
 
         return NextResponse.json(items);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Graph API Error:", error);
 
         let availableFields = "Could not verify fields.";
 
+        const graphError = error as { statusCode?: number; body?: string; message?: string };
         // Diagnostic: If it's a field name error, try to fetch one item to see available fields
-        if (error.statusCode === 400 || (error.body && error.body.includes("field name is not recognized"))) {
+        if (graphError.statusCode === 400 || (graphError.body && graphError.body.includes("field name is not recognized"))) {
             try {
                 const client = getGraphClient(session.accessToken);
                 const probe = await client
@@ -167,7 +170,7 @@ export async function GET(request: Request) {
         return NextResponse.json(
             {
                 error: "Failed to fetch data. Likely invalid column name.",
-                details: error.message,
+                details: (error as Error).message,
                 possibleFix: "Check your SharePoint list settings for internal names.",
                 availableColumnsOnFirstItem: availableFields
             },

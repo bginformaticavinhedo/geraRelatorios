@@ -28,10 +28,11 @@ export default function ApontamentosReport() {
                 } catch {
                     errorData = { error: res.statusText };
                 }
-                const err: any = new Error(errorData.error || "Failed to fetch");
-                err.details = errorData.details;
-                err.possibleFix = errorData.possibleFix;
-                err.availableColumnsOnFirstItem = errorData.availableColumnsOnFirstItem;
+                const err = new Error(errorData.error || "Failed to fetch") as Error & {
+                    details?: string;
+                    possibleFix?: string;
+                    availableColumnsOnFirstItem?: string;
+                };
                 throw err;
             }
             return res.json();
@@ -153,22 +154,22 @@ export default function ApontamentosReport() {
                 ) : isError ? (
                     <div className="p-12 text-center text-red-500 space-y-2">
                         <p className="font-bold">Erro ao carregar dados.</p>
-                        <p className="text-sm">{(error as any)?.message}</p>
-                        {(error as any)?.details && (
+                        <p className="text-sm">{(error as Error)?.message}</p>
+                        {(error as Error & { details?: string })?.details && (
                             <p className="text-xs bg-red-50 p-2 rounded border border-red-100 font-mono text-left overflow-auto max-h-32">
-                                Details: {(error as any).details}
+                                Details: {(error as Error & { details?: string }).details}
                             </p>
                         )}
-                        {(error as any)?.possibleFix && (
+                        {(error as Error & { possibleFix?: string })?.possibleFix && (
                             <p className="text-xs bg-red-50 p-2 rounded border border-red-100 font-mono text-left overflow-auto max-h-32">
-                                Possible Fix: {(error as any).possibleFix}
+                                Possible Fix: {(error as Error & { possibleFix?: string }).possibleFix}
                             </p>
                         )}
-                        {(error as any)?.availableColumnsOnFirstItem && (
+                        {(error as Error & { availableColumnsOnFirstItem?: string })?.availableColumnsOnFirstItem && (
                             <div className="text-left mt-4 p-4 bg-slate-900 text-slate-200 rounded text-xs font-mono">
                                 <p className="font-bold mb-2 text-yellow-400">⚠️ DEBUG: Colunas Disponíveis (Internal Names):</p>
                                 <div className="break-all">
-                                    {(error as any).availableColumnsOnFirstItem}
+                                    {(error as Error & { availableColumnsOnFirstItem?: string }).availableColumnsOnFirstItem}
                                 </div>
                             </div>
                         )}

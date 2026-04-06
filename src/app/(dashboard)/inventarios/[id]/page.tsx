@@ -112,7 +112,7 @@ function getImageUrl(item: Record<string, any>, keys: string[]): string | null {
 }
 
 // Encontra a chave que realmente tem valor no item
-function getActiveKey(item: Record<string, any>, keys: string[]): string | null {
+function getActiveKey(item: Record<string, unknown>, keys: string[]): string | null {
     for (const key of keys) {
         if (item[key] !== undefined) {
             return key;

@@ -33,15 +33,23 @@ export default function ChamadosReport() {
                 } catch {
                     errorData = { error: res.statusText };
                 }
-                const err: any = new Error(errorData.error || "Failed to fetch");
-                err.details = errorData.details;
-                err.possibleFix = errorData.possibleFix;
-                err.availableColumnsOnFirstItem = errorData.availableColumnsOnFirstItem;
+                const err = new Error(errorData.error || "Failed to fetch") as Error & {
+                    details?: string;
+                    possibleFix?: string;
+                    availableColumnsOnFirstItem?: string;
+                };
                 throw err;
             }
             return res.json();
         },
     });
+    
+    const channelStats = {
+        Presencial: data?.filter(i => i.CanalDeAtendimento?.toLowerCase().includes('presencial')).length ?? 0,
+        Telefônico: data?.filter(i => i.CanalDeAtendimento?.toLowerCase().includes('telef')).length ?? 0,
+        Remoto: data?.filter(i => i.CanalDeAtendimento?.toLowerCase().includes('remoto')).length ?? 0,
+        Total: data?.length ?? 0,
+    };
 
     const handleExportPDF = () => {
         if (!data) return;
@@ -60,7 +68,9 @@ export default function ChamadosReport() {
                 Data: dataStr || '-'
             };
         });
-        exportToPDF(exportData, "Relatório de Chamados", ["Title", "Cliente", "Data", "Status", "Tecnico"]);
+        exportToPDF(exportData, "Relatório de Chamados", ["Title", "Cliente", "Data", "Status", "Tecnico"], {
+            channelStats: { Presencial: channelStats.Presencial, Telefônico: channelStats.Telefônico, Remoto: channelStats.Remoto }
+        });
     };
 
     const handleExportExcel = () => {
@@ -79,6 +89,7 @@ export default function ChamadosReport() {
                 "Chamado": item.Title,
                 "Cliente": item.Cliente,
                 "Data": dataStr || '-',
+                "Canal": item.CanalDeAtendimento || '-',
                 "Status": item.Status,
                 "Técnico": item.Tecnico,
                 "Descrição": item.Descricao || '-'
@@ -151,6 +162,18 @@ export default function ChamadosReport() {
                     <Search className="mr-2 h-4 w-4" /> Filtrar
                 </Button>
             </div>
+            
+            {/* Canal de Atendimento Indicators */}
+            {!isLoading && data && data.length > 0 && (
+                <div className="grid grid-cols-4 gap-3">
+                    {Object.entries(channelStats).map(([canal, count]) => (
+                        <div key={canal} className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 border-l-4 border-l-accent rounded-sm shadow-sm">
+                            <span className="text-sm font-semibold text-slate-600">{canal}</span>
+                            <span className="text-lg font-bold text-accent font-mono">{count}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Data Table */}
             <div className="bg-white rounded-sm shadow-sm border border-slate-200 overflow-hidden">
@@ -161,17 +184,17 @@ export default function ChamadosReport() {
                 ) : isError ? (
                     <div className="p-12 text-center text-red-500 space-y-2">
                         <p className="font-bold">Erro ao carregar dados.</p>
-                        <p className="text-sm">{(error as any)?.message}</p>
-                        {(error as any)?.details && (
+                        <p className="text-sm">{(error as Error)?.message}</p>
+                        {(error as Error & { details?: string })?.details && (
                             <p className="text-xs bg-red-50 p-2 rounded border border-red-100 font-mono text-left overflow-auto max-h-32">
-                                Details: {(error as any).details}
+                                Details: {(error as Error & { details?: string }).details}
                             </p>
                         )}
-                        {(error as any)?.availableColumnsOnFirstItem && (
+                        {(error as Error & { availableColumnsOnFirstItem?: string })?.availableColumnsOnFirstItem && (
                             <div className="text-left mt-4 p-4 bg-slate-900 text-slate-200 rounded text-xs font-mono">
                                 <p className="font-bold mb-2 text-yellow-400">⚠️ DEBUG: Colunas Disponíveis (Internal Names):</p>
                                 <div className="break-all text-xs">
-                                    {(error as any).availableColumnsOnFirstItem}
+                                    {(error as Error & { availableColumnsOnFirstItem?: string }).availableColumnsOnFirstItem}
                                 </div>
                             </div>
                         )}
@@ -186,6 +209,7 @@ export default function ChamadosReport() {
                                     <th className="px-4 py-3 text-left">Cliente</th>
                                     <th className="px-4 py-3 text-left">Abertura</th>
                                     <th className="px-4 py-3 text-left">Tecnico</th>
+                                    <th className="px-4 py-3 text-left">Ações Aplicadas</th>
                                     <th className="px-4 py-3 text-left">Status</th>
                                 </tr>
                             </thead>
@@ -196,6 +220,7 @@ export default function ChamadosReport() {
                                         <td className="px-4 py-3 text-slate-600">{item.Cliente}</td>
                                         <td className="px-4 py-3 text-slate-600 font-mono text-xs">{item.CreatedFormatted || '-'}</td>
                                         <td className="px-4 py-3 text-slate-600">{item.Tecnico}</td>
+                                        <td className="px-4 py-3 text-slate-600 text-xs max-w-xs truncate" title={item.AcoesAplicadas || '-'}>{item.AcoesAplicadas || '-'}</td>
                                         <td className="px-4 py-3">
                                             <span className={cn("px-2 py-0.5 text-[0.7rem] uppercase font-bold tracking-wider rounded-sm",
                                                 item.Status === 'Fechado' ? "bg-green-100 text-green-700" :
